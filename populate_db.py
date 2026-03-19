@@ -1,6 +1,15 @@
+# -*- coding: utf-8 -*-
 """
 Script pour peupler la base de données avec les livres
 """
+import sys
+import os
+
+# Force UTF-8 encoding
+if sys.version_info[0] >= 3:
+    import io
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+
 from backoffice.models import Livre, LivreType, LivreStatus
 
 print("=== Création des données ===\n")
