@@ -15,8 +15,9 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
+from django.conf import settings
 from django.contrib import admin
-from django.urls import path
+from django.urls import include, path
 from bookr_app import views
 import backoffice.views
 
@@ -26,3 +27,6 @@ urlpatterns = [
     path('backoffice', backoffice.views.index),
     path('backoffice/getProduct', backoffice.views.getProduct),
 ]
+
+if settings.DEBUG:
+    urlpatterns += [path("__reload__/", include("django_browser_reload.urls"))]
