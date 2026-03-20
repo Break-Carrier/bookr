@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import sys
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -141,3 +142,4 @@ STATIC_URL = "static/"
 
 # django-tailwind (app générée par `python manage.py tailwind init`)
 TAILWIND_APP_NAME = "theme"
+NPM_BIN_PATH = "npm.cmd" if sys.platform == "win32" else "npm"
