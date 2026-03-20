@@ -6,16 +6,29 @@
 <div class="px-6 py-10">
     <div class="max-w-7xl mx-auto">
 
-        <div class="flex items-start justify-between mb-10">
-            <div>
-                <p class="text-amber-400 text-xs font-semibold tracking-widest uppercase mb-2">Bibliothèque</p>
-                <h1 class="text-4xl font-bold text-white mb-2">Les Auteurs</h1>
-                <p class="text-zinc-400 text-sm">{{ auteurs|length }} auteur{{ auteurs|length|pluralize }} dans le catalogue</p>
-            </div>
-            <a href="{% url 'backoffice:auteur_create' %}" class="bg-amber-400 text-black font-semibold px-5 py-3 rounded-lg hover:bg-amber-300 transition-colors text-sm">
-                + Ajouter un auteur
-            </a>
+        <div class="mb-8">
+            <p class="text-amber-400 text-xs font-semibold tracking-widest uppercase mb-2">Bibliothèque</p>
+            <h1 class="text-4xl font-bold text-white mb-2">Les Auteurs</h1>
+            <p class="text-zinc-400 text-sm">{{ auteurs|length }} auteur{{ auteurs|length|pluralize }} dans le catalogue</p>
         </div>
+
+        <!-- Filtres nationalité -->
+        {% if nationalites %}
+        <div class="flex gap-2 flex-wrap mb-6">
+            <a href="{% url 'bookr_app:auteurs_list' %}"
+               class="text-xs border px-3 py-1.5 rounded-full transition-colors {% if not nationalite_active %}border-amber-400 text-amber-400{% else %}border-zinc-700 text-zinc-400 hover:border-amber-400 hover:text-amber-400{% endif %}">
+                Toutes
+            </a>
+            {% for nat in nationalites %}
+            <a href="?nationalite={{ nat }}"
+               class="text-xs border px-3 py-1.5 rounded-full transition-colors {% if nationalite_active == nat %}border-amber-400 text-amber-400{% else %}border-zinc-700 text-zinc-400 hover:border-amber-400 hover:text-amber-400{% endif %}">
+                {{ nat }}
+            </a>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="border-b border-zinc-800 mb-6"></div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {% for auteur in auteurs %}
@@ -45,7 +58,8 @@
             </a>
             {% empty %}
             <div class="col-span-3 text-center py-16 text-zinc-500">
-                <p class="text-lg">Aucun auteur dans le catalogue</p>
+                <p class="text-lg">Aucun auteur trouvé</p>
+                {% if nationalite_active %}<p class="text-sm mt-1">pour la nationalité "{{ nationalite_active }}"</p>{% endif %}
             </div>
             {% endfor %}
         </div>

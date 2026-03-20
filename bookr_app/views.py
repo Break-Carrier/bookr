@@ -33,8 +33,21 @@ def index(request):
 
 
 def auteurs_list(request):
+    nationalite = request.GET.get('nationalite', '').strip()
     auteurs = Auteur.objects.prefetch_related('livres')
-    return render(request, 'bookr_app/auteurs.html', {'auteurs': auteurs})
+    if nationalite:
+        auteurs = auteurs.filter(nationalite=nationalite)
+    nationalites = (
+        Auteur.objects.exclude(nationalite='')
+        .values_list('nationalite', flat=True)
+        .distinct()
+        .order_by('nationalite')
+    )
+    return render(request, 'bookr_app/auteurs.html', {
+        'auteurs': auteurs,
+        'nationalites': nationalites,
+        'nationalite_active': nationalite,
+    })
 
 
 def auteur_detail(request, auteur_id):
