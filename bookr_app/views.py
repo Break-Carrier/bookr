@@ -1,39 +1,46 @@
-from django.shortcuts import render
-from backoffice.models import Livre, LivreType, LivreStatus
+from django.shortcuts import render, get_object_or_404
+from backoffice.models import Auteur, Livre, LivreType, LivreStatus
 from django.db.models import Sum
 
 
 def index(request):
-    tous_les_livres = Livre.objects.all()
-    livres_commencent_L = Livre.objects.filter(nom__startswith="L")
-    livres_avec_miserables = Livre.objects.filter(nom__icontains="Misérables")
-    livres_prix_gte_10 = Livre.objects.filter(prix__gte=10)
-    livres_prix_10_et_publie = Livre.objects.filter(
-        prix__gte=10,
-        livre_status__status="toujours publié"
-    )
-    livre_prix_max = Livre.objects.order_by('-prix').first()
-    statuts_livres = LivreStatus.objects.all()
-    nombre_total_livres = Livre.objects.count()
+    query = request.GET.get('q', '').strip()
+    genre_id = request.GET.get('genre', '')
+
+    livres = Livre.objects.select_related('auteur', 'livre_type', 'livre_status')
+    if query:
+        livres = livres.filter(nom__icontains=query)
+    if genre_id:
+        livres = livres.filter(livre_type_id=genre_id)
 
     tous_les_types = LivreType.objects.all()
+    nombre_total_livres = Livre.objects.count()
     valeur_catalogue = Livre.objects.aggregate(total=Sum('prix'))['total'] or 0
+    nombre_auteurs = Auteur.objects.count()
     nombre_types = tous_les_types.count()
-    nombre_statuts = statuts_livres.count()
 
     context = {
-        'tous_les_livres': tous_les_livres,
-        'livres_commencent_L': livres_commencent_L,
-        'livres_avec_miserables': livres_avec_miserables,
-        'livres_prix_gte_10': livres_prix_gte_10,
-        'livres_prix_10_et_publie': livres_prix_10_et_publie,
-        'livre_prix_max': livre_prix_max,
-        'statuts_livres': statuts_livres,
-        'nombre_total_livres': nombre_total_livres,
+        'livres': livres,
         'tous_les_types': tous_les_types,
+        'query': query,
+        'genre_id': int(genre_id) if genre_id else None,
+        'nombre_total_livres': nombre_total_livres,
         'valeur_catalogue': valeur_catalogue,
+        'nombre_auteurs': nombre_auteurs,
         'nombre_types': nombre_types,
-        'nombre_statuts': nombre_statuts,
     }
-
     return render(request, 'bookr_app/index.html', context)
+
+
+def auteurs_list(request):
+    auteurs = Auteur.objects.prefetch_related('livres')
+    return render(request, 'bookr_app/auteurs.html', {'auteurs': auteurs})
+
+
+def auteur_detail(request, auteur_id):
+    auteur = get_object_or_404(Auteur, pk=auteur_id)
+    livres = auteur.livres.select_related('livre_type', 'livre_status')
+    return render(request, 'bookr_app/auteur_detail.html', {
+        'auteur': auteur,
+        'livres': livres,
+    })
